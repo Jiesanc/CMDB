@@ -1,10 +1,6 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 
-"""
-内存的单位转换
-"""
-
 def convert_to_int(value,default=0):
 
     try:

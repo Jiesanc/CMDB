@@ -19,7 +19,6 @@ class Settings(object):
         if not settings_module:
             return
         m = importlib.import_module(settings_module)
-        print(m)
         for name in dir(m):
             if name.isupper():
                 value = getattr(m,name)

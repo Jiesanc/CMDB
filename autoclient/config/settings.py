@@ -30,4 +30,7 @@ PLUGINS_DICT = {
     'nic': "src.plugins.nic.Nic",
 }
 
-API = "http://www.xxx.com"
+# API = "http://www.oldboyedu.com"
+API = "http://127.0.0.1:8000/api/asset.html"
+
+CERT_PATH = os.path.join(BASEDIR,'config','cert')

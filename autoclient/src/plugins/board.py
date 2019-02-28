@@ -3,7 +3,6 @@
 import os
 from lib.conf.config import settings
 
-
 class Board(object):
     def __init__(self):
         pass
