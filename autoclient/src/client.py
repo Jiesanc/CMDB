@@ -23,8 +23,8 @@ class Agent(Base):
                 f.write(hostname)
         else:
             server_info['basic']['data']['hostname'] = certname
-        print(server_info)
-        # self.post_asset(server_info)
+
+        self.post_asset(server_info)
 
 class SSHSALT(Base):
     def get_host(self):
