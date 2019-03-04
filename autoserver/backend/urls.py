@@ -22,4 +22,7 @@ urlpatterns = [
 
     url(r'^asset.html$', views.asset),
     url(r'^asset_json.html$', views.asset_json),
+
+    url(r'^idc.html$', views.idc),
+    url(r'^idc_json.html$', views.idc_json),
 ]

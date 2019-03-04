@@ -16,63 +16,59 @@ class JsonCustomEncoder(json.JSONEncoder):
 
 # Create your views here.
 
-def curd(request):
-    # v = models.Server.objects.all()
-    return render(request, 'curd.html')
-
-
-def curd_json(request):
-    table_config = [
-        {
-            'q': 'id',
-            'title': 'ID',
-            'display': False,
-            'text': {
-                'tpl': "{n1}",
-                'kwargs': {'n1': '@id'}
-            },
-            'attrs':{'k1':'v1','k2':'@hostname'}
-
-        },
-        {
-            'q': 'hostname',
-            'title': '主机名',
-            'display': True,
-            'text': {
-                'tpl': "{n1}-{n2}",
-                'kwargs': {'n1': '@hostname', 'n2': '@id'}
-            },
-            'attrs':{'k1':'v1','k2':'@hostname'}
-
-        },
-        # 页面显示：标题：操作；删除，编辑：a标签
-        {
-            'q': None,
-            'title': '操作',
-            'display': True,
-            'text': {
-                'tpl': "<a href='/del?nid={nid}'>删除</a>",
-                'kwargs': {'nid': '@id'}
-            },
-            'attrs':{'k1':'v1','k2':'@hostname'}
-        },
-    ]
-    # 普通值：原值存放即可
-    # @值  ： 根据id，根据获取当前行对应数据
+def get_data_list(request,model_cls,table_config):
     values_list = []
     for row in table_config:
         if not row['q']:
             continue
         values_list.append(row['q'])
 
-    server_list = models.Server.objects.values(*values_list)
+    from django.db.models import Q
 
-    ret = {
-        'server_list': list(server_list),
-        'table_config': table_config
-    }
+    condition = request.GET.get('condition')
+    condition_dict = json.loads(condition)
 
-    return HttpResponse(json.dumps(ret, cls=JsonCustomEncoder))
+    con = Q()
+    for name,values in condition_dict.items():
+        ele = Q() # select xx from where cabinet_num=sdf or cabinet_num='123'
+        ele.connector = 'OR'
+        for item in values:
+            ele.children.append((name,item))
+        con.add(ele, 'AND')
+
+    server_list = model_cls.objects.filter(con).values(*values_list)
+    return server_list
+
+
+def curd(request):
+    # v = models.Server.objects.all()
+    return render(request, 'curd.html')
+
+
+def curd_json(request):
+    if request.method == 'DELETE':
+        id_list = json.loads(str(request.body,encoding='utf-8'))
+        print(id_list)
+        return HttpResponse('....')
+    elif request.method == "PUT":
+        all_list = json.loads(str(request.body,encoding='utf-8'))
+        print(all_list)
+        return HttpResponse('....')
+    elif request.method == "POST":
+        pass
+    elif request.method == 'GET':
+        from backend.page_config import curd as curdConfig
+        server_list = get_data_list(request,models.Asset,curdConfig.table_config)
+        ret = {
+            'server_list': list(server_list),
+            'table_config': curdConfig.table_config,
+            'search_config':curdConfig.search_config,
+             'global_dict':{
+                'device_type_choices': models.Asset.device_type_choices,
+                'device_status_choices': models.Asset.device_status_choices
+            }
+        }
+        return HttpResponse(json.dumps(ret, cls=JsonCustomEncoder))
 
 
 def asset(request):
@@ -81,87 +77,62 @@ def asset(request):
 
 
 def asset_json(request):
-    table_config = [
-        {
-            'q': 'id',
-            'title': 'ID',
-            'display': False,
-            'text': {
-                'tpl': "{n1}",
-                'kwargs': {'n1': '@id'}
+    if request.method == 'DELETE':
+        id_list = json.loads(str(request.body,encoding='utf-8'))
+        print(id_list)
+        return HttpResponse('...')
+    elif request.method == "PUT":
+        all_list = json.loads(str(request.body,encoding='utf-8'))
+        for row in all_list:
+            nid = row.pop('id')
+            models.Asset.objects.filter(id=nid).update(**row)
+        return HttpResponse('....')
+    elif request.method == "POST":
+        pass
+    elif request.method == 'GET':
+        from backend.page_config import asset as assetConfig
+        server_list = get_data_list(request,models.Asset,assetConfig.table_config)
+        ret = {
+            'server_list': list(server_list),
+            'table_config': assetConfig.table_config,
+            'global_dict':{
+                'device_type_choices': models.Asset.device_type_choices,
+                'device_status_choices': models.Asset.device_status_choices,
+                'idc_choices': list(models.IDC.objects.values_list('id','name'))
             },
-            'attrs':{'k1':'v1','k2':'@id'}
-        },
-        {
-            'q': 'device_type_id',
-            'title': '资产类型',
-            'display': True,
-            'text': {
-                'tpl': "{n1}",
-                'kwargs': {'n1': '@@device_type_choices'}
-            },
-            'attrs':{'k1':'v1','k2':'@id'}
-        },
-        {
-            'q': 'device_status_id',
-            'title': '状态',
-            'display': True,
-            'text': {
-                'tpl': "{n1}",
-                'kwargs': {'n1': '@@device_status_choices'}
-            },
-            'attrs':{'k1':'v1','k2':'@id'}
-        },
-        {
-            'q': 'cabinet_num',
-            'title': '机柜号',
-            'display': True,
-            'text': {
-                'tpl': "{n1}",
-                'kwargs': {'n1': '@cabinet_num'}
-            },
-            'attrs':{'k1':'v1','k2':'@id'}
-        },
-        {
-            'q': 'idc__name',
-            'title': '机房',
-            'display': True,
-            'text': {
-                'tpl': "{n1}",
-                'kwargs': {'n1': '@idc__name'}
-            },
-            'attrs':{'k1':'v1','k2':'@id'}
-        },
-        # 页面显示：标题：操作；删除，编辑：a标签
-        {
-            'q': None,
-            'title': '操作',
-            'display': True,
-            'text': {
-                'tpl': "<a href='/del?nid={nid}'>删除</a>",
-                'kwargs': {'nid': '@id'}
-            },
-            'attrs':{'k1':'v1','k2':'@id'}
-        },
-    ]
-    # 普通值：原值存放即可
-    # @值  ： 根据id，根据获取当前行对应数据
-    values_list = []
-    for row in table_config:
-        if not row['q']:
-            continue
-        values_list.append(row['q'])
+            'search_config':assetConfig.search_config
 
-    server_list = models.Asset.objects.values(*values_list)
-
-    ret = {
-        'server_list': list(server_list),
-        'table_config': table_config,
-        'global_dict':{
-            'device_type_choices': models.Asset.device_type_choices,
-            'device_status_choices': models.Asset.device_status_choices
         }
 
-    }
+        return HttpResponse(json.dumps(ret, cls=JsonCustomEncoder))
 
-    return HttpResponse(json.dumps(ret, cls=JsonCustomEncoder))
+
+def idc(request):
+    return render(request,'idc.html')
+
+def idc_json(request):
+    if request.method == 'DELETE':
+        id_list = json.loads(str(request.body,encoding='utf-8'))
+        print(id_list)
+        return HttpResponse('。。。')
+    elif request.method == "PUT":
+        all_list = json.loads(str(request.body,encoding='utf-8'))
+        print(all_list)
+        return HttpResponse('。。。')
+    elif request.method == 'GET':
+        from backend.page_config import idc
+        values_list = []
+        for row in idc.table_config:
+            if not row['q']:
+                continue
+            values_list.append(row['q'])
+
+        server_list = models.IDC.objects.values(*values_list)
+
+        ret = {
+            'server_list': list(server_list),
+            'table_config': idc.table_config,
+            'global_dict':{}
+
+        }
+        return HttpResponse(json.dumps(ret, cls=JsonCustomEncoder))

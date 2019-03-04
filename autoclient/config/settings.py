@@ -33,5 +33,6 @@ PLUGINS_DICT = {
 # API = "http://www.oldboyedu.com"
 API = "http://127.0.0.1:8000/api/asset.html"
 PUB_KEY = b'LS0tLS1CRUdJTiBSU0EgUFVCTElDIEtFWS0tLS0tCk1DZ0NJUUN2Q0p3anllTTUwc3FUMGVXNHpEVXFGNllDS01QanlUVW56TFptSW5OeUR3SURBUUFCCi0tLS0tRU5EIFJTQSBQVUJMSUMgS0VZLS0tLS0K'
-
 CERT_PATH = os.path.join(BASEDIR,'config','cert')
+
+DATA_KEY = b'dfdsdfsasdfdsdfs'

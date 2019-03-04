@@ -45,7 +45,6 @@ def decrypt(value):
     val = rsa.decrypt(value, pk)
     return val
 
-# hello world 你好世界
 
 # ######### 基本使用 #########
 if __name__ == '__main__':

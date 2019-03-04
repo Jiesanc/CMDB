@@ -3,14 +3,15 @@ import json
 from src.plugins import PluginManager
 from lib.conf.config import settings
 from concurrent.futures import ThreadPoolExecutor
-
+from lib.utils import encrypt,auth
 class Base(object):
     def post_asset(self,server_info):
-        requests.post(settings.API,json=server_info)
-        # body: json.dumps(server_info)
-        # headers= {'content-type':'application/json'}
-        # request.body
-        # json.loads(request.body)
+        data = encrypt(json.dumps(server_info))
+        requests.post(
+            url=settings.API,
+            data=data,
+            headers={'OpenKey':auth(),'Content-Type':'application/json'}
+        )
 
 class Agent(Base):
 
